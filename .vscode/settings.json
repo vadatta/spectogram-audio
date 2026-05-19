@@ -1,0 +1,6 @@
+{
+  "python.defaultInterpreterPath": "/Users/varun/anaconda3/bin/python",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}"
+  ]
+}
