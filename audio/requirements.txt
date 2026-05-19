@@ -1,0 +1,7 @@
+datasets[audio]==2.19.2
+numpy>=1.24.0
+soundfile>=0.12.1
+torch>=2.2.0
+torchaudio>=2.2.0
+torchvision>=0.17.0
+tqdm>=4.66.0
