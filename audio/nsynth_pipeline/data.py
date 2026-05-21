@@ -70,6 +70,7 @@ class NSynthDataset(Dataset):
         mel_config: Optional[MelConfig] = None,
         max_items: Optional[int] = None,
         streaming: bool = False,
+        cache_dir: Optional[str] = None,
     ):
         self.mel_config = mel_config or MelConfig()
         self.log_mel = LogMelTransform(self.mel_config)
@@ -78,6 +79,7 @@ class NSynthDataset(Dataset):
             dataset_name,
             split=hf_split,
             streaming=streaming,
+            cache_dir=cache_dir,
             trust_remote_code=True,
         )
         self.dataset = dataset.cast_column("audio", Audio(sampling_rate=self.mel_config.sample_rate))
@@ -93,16 +95,10 @@ class NSynthDataset(Dataset):
 
         pitch = int(item["pitch"])
         note_class = pitch % 12
-        qualities = torch.as_tensor(item["qualities"], dtype=torch.float32)
-
         return {
             "spectrogram": spectrogram,
             "note_class": torch.tensor(note_class, dtype=torch.long),
-            "note_name": NOTE_NAMES[note_class],
-            "instrument": torch.tensor(int(item["instrument"]), dtype=torch.long),
             "pitch": torch.tensor(pitch, dtype=torch.long),
-            "velocity": torch.tensor(int(item["velocity"]), dtype=torch.long),
-            "qualities": qualities,
         }
 
 
@@ -113,18 +109,21 @@ def make_nsynth_loaders(
     max_train_items: Optional[int] = None,
     max_test_items: Optional[int] = None,
     mel_config: Optional[MelConfig] = None,
+    cache_dir: Optional[str] = None,
 ) -> Dict[str, DataLoader]:
     train_ds = NSynthDataset(
         "train",
         dataset_name=dataset_name,
         mel_config=mel_config,
         max_items=max_train_items,
+        cache_dir=cache_dir,
     )
     test_ds = NSynthDataset(
         "test",
         dataset_name=dataset_name,
         mel_config=mel_config,
         max_items=max_test_items,
+        cache_dir=cache_dir,
     )
     return {
         "train": DataLoader(
